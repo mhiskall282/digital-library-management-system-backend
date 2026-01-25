@@ -1,0 +1,38 @@
+{
+  "name": "digital-library-management-system-backend",
+  "version": "1.0.0",
+  "description": "library management system to manage slides and academic resources for UEWABS",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+     "dev": "nodemon src/server.js",
+  "start": "node src/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mhiskall282/digital-library-management-system-backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/mhiskall282/digital-library-management-system-backend/issues"
+  },
+  "homepage": "https://github.com/mhiskall282/digital-library-management-system-backend#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "D": "^1.0.0",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "firebase-admin": "^13.6.0",
+    "multer": "^2.0.2",
+    "nodemon": "^3.1.11"
+  },
+
+  "devDependencies": {
+    "nodemon": "^3.1.11",
+    "ts-node": "^10.9.1"
+    
+  }
+}
