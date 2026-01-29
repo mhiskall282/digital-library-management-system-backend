@@ -2,6 +2,8 @@ const Resource = require('../models/Resource');
 const Category = require('../models/Category');
 const fs = require('fs');
 const path = require('path');
+const notificationService = require('../utils/notificationService');
+
 
 // @desc    Upload new resource
 // @route   POST /api/resources/upload
@@ -34,6 +36,19 @@ exports.uploadResource = async (req, res) => {
       uploadedBy: req.user._id,
       academicYear
     });
+
+    // Notify users of the level about new resource
+    try {
+      await notificationService.notifyUsersByLevel(level, {
+        type: 'NEW_RESOURCE',
+        title: 'New Resource Available',
+        message: `New ${type === 'SLIDE' ? 'slide' : 'past question'} uploaded: ${title}`,
+        resource: resource._id,
+        link: `/resources/${resource._id}`
+      });
+    } catch (notifError) {
+      console.error('Error sending notifications:', notifError);
+    }
 
     const populatedResource = await Resource.findById(resource._id)
       .populate('category')
@@ -206,6 +221,151 @@ exports.getCategories = async (req, res) => {
     res.json({
       count: categories.length,
       categories
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+//const notificationService = require('../utils/notificationService');
+
+// Add to the end of resourceController.js
+
+// @desc    Upload multiple resources
+// @route   POST /api/resources/upload-multiple
+// @access  Private/Admin
+exports.uploadMultipleResources = async (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ message: 'Please upload at least one file' });
+    }
+
+    const { category, level, type, academicYear } = req.body;
+
+    // Verify category exists
+    const categoryExists = await Category.findById(category);
+    if (!categoryExists) {
+      // Delete uploaded files if category doesn't exist
+      req.files.forEach(file => {
+        if (fs.existsSync(file.path)) {
+          fs.unlinkSync(file.path);
+        }
+      });
+      return res.status(404).json({ message: 'Category not found' });
+    }
+
+    // Create resources for each file
+    const resources = await Promise.all(
+      req.files.map(file => 
+        Resource.create({
+          title: file.originalname.replace(/\.[^/.]+$/, ''), // Remove extension
+          type,
+          category,
+          level,
+          fileName: file.filename,
+          filePath: file.path,
+          fileSize: file.size,
+          uploadedBy: req.user._id,
+          academicYear
+        })
+      )
+    );
+
+    // Notify users of the level about new resources
+    try {
+      await notificationService.notifyUsersByLevel(level, {
+        type: 'NEW_RESOURCE',
+        title: 'New Resources Available',
+        message: `${resources.length} new ${type === 'SLIDE' ? 'slide(s)' : 'past question(s)'} uploaded for ${categoryExists.courseName}`,
+        link: `/resources?level=${level}&category=${category}`
+      });
+    } catch (notifError) {
+      console.error('Error sending notifications:', notifError);
+    }
+
+    const populatedResources = await Resource.find({
+      _id: { $in: resources.map(r => r._id) }
+    })
+      .populate('category')
+      .populate('uploadedBy', 'firstName lastName email');
+
+    res.status(201).json({
+      count: populatedResources.length,
+      resources: populatedResources
+    });
+  } catch (error) {
+    // Delete files if resource creation fails
+    if (req.files) {
+      req.files.forEach(file => {
+        if (fs.existsSync(file.path)) {
+          fs.unlinkSync(file.path);
+        }
+      });
+    }
+    console.error(error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// @desc    Advanced search with filters
+// @route   GET /api/resources/search/advanced
+// @access  Private
+exports.advancedSearch = async (req, res) => {
+  try {
+    const {
+      query,
+      type,
+      level,
+      category,
+      minRating,
+      academicYear,
+      sortBy = 'createdAt',
+      order = 'desc',
+      page = 1,
+      limit = 20
+    } = req.query;
+
+    let searchQuery = {};
+
+    // Text search
+    if (query) {
+      searchQuery.$or = [
+        { title: { $regex: query, $options: 'i' } },
+        { description: { $regex: query, $options: 'i' } },
+        { tags: { $in: [new RegExp(query, 'i')] } }
+      ];
+    }
+
+    // Filters
+    if (type) searchQuery.type = type;
+    if (level) searchQuery.level = level;
+    if (category) searchQuery.category = category;
+    if (minRating) searchQuery.averageRating = { $gte: parseFloat(minRating) };
+    if (academicYear) searchQuery.academicYear = academicYear;
+
+    // Sorting
+    const sortOptions = {};
+    sortOptions[sortBy] = order === 'desc' ? -1 : 1;
+
+    // Pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const resources = await Resource.find(searchQuery)
+      .populate('category')
+      .populate('uploadedBy', 'firstName lastName')
+      .sort(sortOptions)
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const total = await Resource.countDocuments(searchQuery);
+
+    res.json({
+      page: parseInt(page),
+      limit: parseInt(limit),
+      total,
+      pages: Math.ceil(total / parseInt(limit)),
+      resources
     });
   } catch (error) {
     console.error(error);
