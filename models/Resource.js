@@ -50,7 +50,27 @@ const resourceSchema = new mongoose.Schema({
     type: String,
     trim: true
   }
-}, {
+}, 
+academicYear: {
+    type: String,
+    trim: true
+  },
+  // Add these new fields
+  averageRating: {
+    type: Number,
+    default: 0,
+    min: 0,
+    max: 5
+  },
+  totalReviews: {
+    type: Number,
+    default: 0
+  },
+  tags: [{
+    type: String,
+    trim: true
+  }],
+  {
   timestamps: true
 });
 
