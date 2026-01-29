@@ -41,8 +41,12 @@ const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB limit
+    fileSize: 10 * 1024 * 1024 // 10MB limit per file
   }
 });
 
-module.exports = upload;
+// Export different upload configurations
+module.exports = {
+  single: upload.single('file'),
+  multiple: upload.array('files', 10) // Max 10 files at once
+};
