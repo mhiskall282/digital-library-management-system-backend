@@ -21,6 +21,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if ($this->app->environment('production') || env('APP_ENV') === 'production' || request()->header('X-Forwarded-Proto') === 'https') {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
         Gate::define('manage-settings', function (User $user) {
             return $user->isSuperAdmin() || $user->isAdmin();
         });

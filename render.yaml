@@ -20,10 +20,7 @@ services:
       - key: APP_KEY
         value: "base64:6MsNsV445Nu736a1nFYqt1cNboYaJQJZk/nv7FTp9K4="
       - key: APP_URL
-        fromService:
-          type: web
-          name: uew-digital-library
-          property: host
+        value: "https://uew-digital-library.onrender.com"
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_HOST
