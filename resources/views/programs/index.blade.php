@@ -3,7 +3,7 @@
 @section('title', 'Academic Programs & Level Directory')
 
 @section('content')
-<div class="space-y-6" x-data="{ selectedProgram: Object.keys(@js($programsCatalog))[0] || '', selectedLevel: 'L100' }">
+<div class="space-y-6" x-data="{ selectedProgram: '{{ array_key_first($programsCatalog) ?? '' }}', selectedLevel: 'L100' }">
 
     <!-- Header Banner -->
     <div class="p-6 sm:p-10 rounded-3xl text-white shadow-lg relative overflow-hidden"

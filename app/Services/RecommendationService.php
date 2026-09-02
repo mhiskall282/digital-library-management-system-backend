@@ -78,7 +78,7 @@ class RecommendationService
     public function getProgramsCatalog(): array
     {
         $categories = Category::with(['resources' => function ($q) {
-            $q->approved()->with('uploader');
+            $q->approved()->select(['id', 'title', 'type', 'status', 'category_id', 'file_size', 'downloads', 'uploaded_by', 'created_at'])->with('uploader:id,first_name,last_name');
         }])->get();
 
         $grouped = [];

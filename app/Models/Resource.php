@@ -37,6 +37,10 @@ class Resource extends Model
         'tags',
     ];
 
+    protected $hidden = [
+        'file_blob',
+    ];
+
     protected function casts(): array
     {
         return [
