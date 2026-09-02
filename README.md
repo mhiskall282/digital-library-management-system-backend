@@ -73,18 +73,33 @@ A modern, enterprise-grade academic repository and learning management system de
   - Security Alerts for password/authentication events (`SecurityAlertMail`)
   - Broadcast Announcements (`AdminBroadcastMail`)
 
-### 10. 📑 Bulk Student Ingestion (CSV / Excel)
+### 10. ✉️ In-App Email Studio & Simulator (`/admin/mail-studio`)
+- **Visual Template Inspector**: Real-time rendering and responsive preview for all 3 institutional email templates.
+- **Dual Delivery Modes**:
+  - **⚡ In-App Simulator**: Instant zero-dependency delivery directly into the In-App Mailbox for testing workflows without an active mail server.
+  - **🌐 Live SMTP**: Direct dispatch via Google Workspace / Gmail or Zoho. If server policies restrict delivery, the system automatically falls back to archiving the full email in the In-App Mailbox.
+- **Inbound Message Simulation**: Simulate receiving student and staff replies to test end-to-end communication loops without paying for third-party IMAP/POP3 subscriptions.
+- **HTML Telemetry & Payload Inspector**: Click any message in the mailbox to view rendered HTML, transmission headers, and delivery status.
+
+### 11. ⚙️ Dynamic SMTP Server Management (`/admin/settings`)
+- Configure and update outbound mail server credentials directly from the Admin Dashboard.
+- **One-Click Presets**: Pre-configures Google Gmail / Workspace (Port 587 TLS), Zoho Mail (Port 465 SSL), or Log Driver.
+- **Secure Key Storage**: Passwords are securely stored in the database, masked in the UI, and never overwritten unless a new key is typed.
+- **Live Connection Ping**: Test connectivity to any recipient with a single click.
+- **Zero-Redeployment Real-Time Binding**: All application emails automatically use database settings without restarting containers or editing `.env`.
+
+### 12. 📑 Bulk Student Ingestion (CSV / Excel)
 - Batch upload class rosters via `/admin/users/import`.
 - Automated account creation with cryptographically secure temporary passwords and un-onboarded status.
 - Automated email dispatch of activation links and sign-in credentials.
 - Downloadable official CSV template (`/admin/users/import/sample`).
 
-### 11. 📊 System Audit Logs & Compliance Reports (`/admin/reports`)
+### 13. 📊 System Audit Logs & Compliance Reports (`/admin/reports`)
 - Comprehensive audit trail of all platform events (Downloads, Uploads, Approvals, Broadcasts, Logins).
 - Filter by action event, date range (Today, Week, Month, All Time), or search term.
 - **Export CSV Report**: One-click download of audit logs for the Dean and University Academic Board.
 
-### 12. 🛡️ Security Hardening & Zero Credential Exposure
+### 14. 🛡️ Security Hardening & Zero Credential Exposure
 - Public login screen (`/login`) is strictly hardened: all hardcoded demo credential quick-fill cards have been removed.
 - Full rate-limiting on sensitive endpoints.
 - Protection against Path Traversal, MIME sniffing, and SQL injection.

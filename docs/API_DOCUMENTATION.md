@@ -154,8 +154,9 @@ Protected by `auth` + admin role middleware:
 ### Settings
 | Method | URI | Name | Description |
 |--------|-----|------|-------------|
-| `GET` | `/admin/settings` | `admin.settings` | System configuration — academic settings, storage, gating |
-| `PUT` | `/admin/settings` | `admin.settings.update` | Update configuration values |
+| `GET` | `/admin/settings` | `admin.settings` | System configuration — academic settings, storage, gating, SMTP credentials |
+| `PUT` | `/admin/settings` | `admin.settings.update` | Update configuration values and SMTP authentication keys |
+| `POST` | `/admin/settings/test-smtp` | `admin.settings.test-smtp` | Send instant live SMTP connection test ping |
 | `POST` | `/admin/settings/cache-clear` | `admin.settings.cache-clear` | Flush application, route, and view caches |
 
 ---

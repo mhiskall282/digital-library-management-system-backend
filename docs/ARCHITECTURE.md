@@ -149,16 +149,19 @@ Three branded institutional email templates with dual delivery pathways:
 | `SecurityAlertMail` | `emails/security/alert` | Password reset, suspicious login |
 | `AdminBroadcastMail` | `emails/admin/broadcast` | Departmental announcement to all users |
 
-### Dual Delivery Modes:
-1. **Live SMTP (Zoho Mail)**: Configured for `smtppro.zoho.com:465 (SSL)`.
-2. **In-App Simulator & Telemetry Mailbox**:
+### Dual Delivery Modes & Dynamic UI Configuration:
+1. **Dynamic Database-Driven SMTP Engine (`/admin/settings` -> SMTP & Email Logins)**:
+   - Administrators can update the SMTP mailer, host (`smtp.gmail.com`, `smtppro.zoho.com`), port (`587`, `465`), encryption (`tls`, `ssl`), username, password, and sender identities directly through the web UI.
+   - `AppServiceProvider` dynamically binds database settings to Laravel's runtime mail configuration without container redeployment.
+   - Includes instant one-click connection ping and quick-presets for Google Workspace and Zoho.
+2. **In-App Simulator & Telemetry Mailbox (`/admin/mail-studio`)**:
    - Dispatches are automatically recorded to the `email_logs` table.
-   - If external SMTP fails (e.g. Zoho `554 5.7.8` due to free account IMAP/POP3 restrictions), the system gracefully archives the full HTML email to the In-App Mailbox with diagnostic explanations.
+   - If external SMTP fails (e.g. server-side policy block), the system gracefully archives the full HTML email to the In-App Mailbox with diagnostic explanations.
    - Admins can inspect full rendered HTML, headers, and status in `/admin/mail-studio`.
    - Inbound simulation allows testing student replies and inquiries without requiring premium mail server packages.
 
 **Admin Test Studio**: `/admin/mail-studio`  
-**CLI Diagnostic**: `php tests/zoho_smtp_diagnostic.php`  
+**Admin SMTP Settings**: `/admin/settings` (Tab: ✉️ SMTP & Email Logins)  
 **CLI Test**: `php artisan mail:test-templates [--smtp]`
 
 ---
@@ -187,6 +190,6 @@ All security-relevant actions are logged to the `activity_logs` table:
 | Environment | Platform | Database | File Storage |
 |------------|----------|----------|-------------|
 | Local Dev | Native PHP / Docker Compose | SQLite | Disk / BLOB |
-| Staging | Render (free plan) | PostgreSQL 16 `basic-256mb` | BLOB + 10GB NVMe Disk |
-| Production | Render (standard plan) | PostgreSQL 16 `pro-1gb` | BLOB + 10GB NVMe Disk |
+| Staging | Render | PostgreSQL 16 `basic-256mb` | BLOB + 10GB NVMe Disk |
+| Production | Render | PostgreSQL 16 `basic-1gb` (`diskSizeGB: 10`) | BLOB + 10GB NVMe Disk |
 | Alternative | Vercel (serverless) | External PostgreSQL | BLOB only (no disk) |
