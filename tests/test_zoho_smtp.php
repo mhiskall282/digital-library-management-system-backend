@@ -52,6 +52,13 @@ $configurations = [
         'port' => 587,
         'encryption' => 'tls',
     ],
+    [
+        'name' => 'Zoho US SSL (465)',
+        'host' => 'smtppro.zoho.com',
+        'port' => 465,
+        'encryption' => 'ssl',
+    ],
+    
 ];
 
 $success = false;

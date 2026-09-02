@@ -1,11 +1,11 @@
 services:
-  # Web Application Service
+  # Web Application Service — Standard Plan (Production-Grade)
   - type: web
     name: uew-digital-library
     runtime: docker
     dockerfilePath: ./deploy/Dockerfile
     dockerContext: .
-    plan: starter
+    plan: standard
     region: frankfurt
     branch: main
     autoDeploy: true
@@ -58,16 +58,32 @@ services:
         value: stderr
       - key: LOG_LEVEL
         value: info
+      - key: MAIL_MAILER
+        value: smtp
+      - key: MAIL_HOST
+        value: smtppro.zoho.com
+      - key: MAIL_PORT
+        value: "465"
+      - key: MAIL_ENCRYPTION
+        value: ssl
+      - key: MAIL_FROM_ADDRESS
+        value: test@johnokyere.xyz
+      - key: MAIL_FROM_NAME
+        value: "UEW School of Business Digital Library"
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
     disk:
       name: uew-library-storage
       mountPath: /var/www/html/storage/app/public
       sizeGB: 10
 
-# Managed PostgreSQL Database
+# Managed PostgreSQL Database — Pro Plan (1 GB RAM, Production-Grade)
 databases:
   - name: uew-library-db
     databaseName: uew_library
     user: uew_admin
     region: frankfurt
-    plan: starter
+    plan: pro-1gb
     postgresMajorVersion: 16
