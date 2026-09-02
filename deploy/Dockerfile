@@ -5,9 +5,9 @@ FROM node:22-alpine AS node-build
 
 WORKDIR /app
 
-# Install Node deps first (cached layer)
+# Install Node deps (--legacy-peer-deps handles vite/laravel-vite-plugin peer dep)
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm install --legacy-peer-deps
 
 # Copy only files needed for the build
 COPY vite.config.js ./
