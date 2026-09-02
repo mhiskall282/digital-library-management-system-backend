@@ -29,8 +29,8 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
-          extensions: mbstring, pdo, pdo_pgsql, pgsql, intl, gd, zip
+          php-version: '8.4'
+          extensions: mbstring, pdo, pdo_pgsql, pgsql, sqlite3, pdo_sqlite, intl, gd, zip
           coverage: none
 
       - name: Setup Node.js
@@ -38,15 +38,21 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Copy .env file
+        run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+
       - name: Install Composer Dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Generate Application Key
+        run: php artisan key:generate
 
       - name: Install Node Dependencies & Build Assets
         run: |
           npm ci
           npm run build
 
-      - name: Run Database Migrations
+      - name: Run Database Migrations on PostgreSQL
         env:
           DB_CONNECTION: pgsql
           DB_HOST: 127.0.0.1
@@ -56,16 +62,19 @@ jobs:
           DB_PASSWORD: test_password
         run: php artisan migrate --force
 
+      - name: Execute Tests via PHPUnit
+        run: php artisan test
+
   deploy:
     name: Trigger Render Deployment
     needs: test
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
+    env:
+      RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
 
     steps:
       - name: Call Render Deploy Hook
         if: env.RENDER_DEPLOY_HOOK_URL != ''
-        env:
-          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
         run: |
-          curl -X POST "$RENDER_DEPLOY_HOOK_URL"
+          curl -f -X POST "$RENDER_DEPLOY_HOOK_URL"
