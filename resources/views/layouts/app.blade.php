@@ -415,7 +415,6 @@
                     </div>
                 @endauth
             </div>
-        </div>
     </header>
 
     <!-- Global Toast & Flash Notifications -->
