@@ -34,13 +34,13 @@ class TestEmailTemplatesCommand extends Command
         if ($this->option('smtp')) {
             $this->info("🔧 Configuring dynamic Zoho SMTP with credentials...");
             Config::set('mail.default', 'smtp');
-            Config::set('mail.mailers.smtp.host', 'smtppro.zoho.com');
-            Config::set('mail.mailers.smtp.port', 465);
-            Config::set('mail.mailers.smtp.encryption', 'ssl');
-            Config::set('mail.mailers.smtp.username', 'test@johnokyere.xyz');
-            Config::set('mail.mailers.smtp.password', 'Mhiskall9090@');
-            Config::set('mail.from.address', 'test@johnokyere.xyz');
-            Config::set('mail.from.name', 'UEW School of Business Digital Library');
+            Config::set('mail.mailers.smtp.host', config('mail.mailers.smtp.host'));
+            Config::set('mail.mailers.smtp.port', config('mail.mailers.smtp.port'));
+            Config::set('mail.mailers.smtp.encryption', config('mail.mailers.smtp.encryption'));
+            Config::set('mail.mailers.smtp.username', config('mail.mailers.smtp.username'));
+            Config::set('mail.mailers.smtp.password', config('mail.mailers.smtp.password'));
+            Config::set('mail.from.address', config('mail.from.address'));
+            Config::set('mail.from.name', config('mail.from.name'));
         }
 
         // 1. Test Welcome Activation Mail

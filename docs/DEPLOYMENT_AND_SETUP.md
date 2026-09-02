@@ -68,12 +68,12 @@ The app is configured to send transactional email via Zoho Mail.
 ### `.env` Configuration
 ```env
 MAIL_MAILER=smtp
-MAIL_HOST=smtppro.zoho.com
-MAIL_PORT=465
-MAIL_USERNAME=test@johnokyere.xyz
-MAIL_PASSWORD=Mhiskall9090@
-MAIL_ENCRYPTION=ssl
-MAIL_FROM_ADDRESS="test@johnokyere.xyz"
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=5231570343@st.uew.edu.gh
+MAIL_PASSWORD=your_16_char_google_app_password
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS="5231570343@st.uew.edu.gh"
 MAIL_FROM_NAME="UEW School of Business Digital Library"
 ```
 
