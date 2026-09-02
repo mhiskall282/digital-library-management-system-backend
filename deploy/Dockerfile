@@ -1,7 +1,7 @@
 # ============================================================
 # Stage 1: Node — Frontend Asset Compilation
 # ============================================================
-FROM node:22-alpine AS node-build
+FROM node:lts-alpine AS node-build
 
 WORKDIR /app
 
