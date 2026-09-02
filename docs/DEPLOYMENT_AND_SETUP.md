@@ -7,12 +7,12 @@ The application ships with a complete Infrastructure-as-Code blueprint in [`rend
 1. Push the repository to GitHub (already done — `mhiskall282/digital-library-management-system-backend`).
 2. Visit [https://dashboard.render.com](https://dashboard.render.com) → **New** → **Blueprint** → Connect the GitHub repo.
 3. Render auto-detects `render.yaml` and provisions:
-   - **Web Service** (`uew-digital-library`): Docker container (PHP 8.4 + Nginx + Supervisor).
-   - **PostgreSQL Database** (`uew-library-db`): Managed PostgreSQL 16, `basic-256mb` plan.
+   - **Web Service** (`uew-digital-library`): Docker container (PHP 8.4 + Nginx + Supervisor) on the `standard` plan.
+   - **PostgreSQL Database** (`uew-library-db`): Managed PostgreSQL 16, `basic-1gb` paid plan with 10 GB disk.
    - **Persistent NVMe Disk** (`uew-library-storage`): 10 GB mounted at `/var/www/html/storage/app/public` so uploaded slide decks survive container restarts.
 4. Set `MAIL_USERNAME` and `MAIL_PASSWORD` as **secret** environment variables inside the Render Dashboard (not committed to `render.yaml`).
 
-> **Plan note**: The legacy `starter` Postgres plan has been removed by Render. The blueprint uses `basic-256mb` — Render's current entry-level plan. Upgrade to `pro-1gb` for production workloads.
+> **Plan note**: Render's current valid PostgreSQL plan identifiers are `free`, `basic-256mb`, `basic-1gb`, `standard-4gb`, `pro-8gb`, etc. Storage is configured separately using `diskSizeGB`. The legacy `starter` plan is no longer supported for new databases.
 
 ---
 
@@ -23,7 +23,7 @@ services:
   - type: web
     name: uew-digital-library
     runtime: docker
-    plan: free              # upgrade to 'standard' for production
+    plan: standard          # Paid plan — $25/month
     region: frankfurt
     healthCheckPath: /health
     disk:
@@ -33,9 +33,12 @@ services:
 
 databases:
   - name: uew-library-db
-    plan: basic-256mb       # Render current supported plan
+    plan: basic-1gb         # Paid plan — $20/month, 1 GB RAM, 10 GB disk
+    diskSizeGB: 10          # Separate storage field (Render flexible plan model)
     postgresMajorVersion: 16
 ```
+
+> **Finding valid plan IDs**: Open the Render Dashboard → **New PostgreSQL** — the plan names shown in the UI are the exact identifiers to use in `render.yaml`.
 
 ---
 

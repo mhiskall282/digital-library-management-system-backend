@@ -1,4 +1,41 @@
-FROM php:8.3-fpm-alpine AS base
+# ============================================================
+# Stage 1: Node — Frontend Asset Compilation
+# ============================================================
+FROM node:22-alpine AS node-build
+
+WORKDIR /app
+
+# Install Node deps first (cached layer)
+COPY package.json package-lock.json ./
+RUN npm ci
+
+# Copy only files needed for the build
+COPY vite.config.js ./
+COPY resources/ resources/
+COPY public/ public/
+
+# Build Vite/Tailwind assets
+RUN npm run build
+
+# ============================================================
+# Stage 2: Composer — PHP Dependencies
+# ============================================================
+FROM composer:2 AS composer-deps
+
+WORKDIR /app
+
+COPY composer.json composer.lock ./
+RUN composer install \
+    --no-dev \
+    --no-scripts \
+    --no-autoloader \
+    --prefer-dist \
+    --optimize-autoloader
+
+# ============================================================
+# Stage 3: Production Runtime
+# ============================================================
+FROM php:8.4-fpm-alpine AS production
 
 # Install system dependencies
 RUN apk add --no-cache \
@@ -11,63 +48,32 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install -j$(nproc) \
     pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd intl opcache xml
 
-# Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Copy Nginx, Supervisor, PHP config from deploy/docker/
+COPY deploy/docker/nginx.conf        /etc/nginx/http.d/default.conf
+COPY deploy/docker/supervisord.conf  /etc/supervisor/conf.d/supervisord.conf
+COPY deploy/docker/php.ini           /usr/local/etc/php/conf.d/99-production.ini
 
-# Install Node.js for Vite asset compilation
-RUN apk add --no-cache nodejs npm
-
+# Set working directory
 WORKDIR /var/www/html
 
-# ============================================
-# Composer dependencies (cached layer)
-# ============================================
-FROM base AS composer-deps
-COPY composer.json composer.lock ./
-RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
-
-# ============================================
-# Node dependencies & asset build
-# ============================================
-FROM base AS node-build
-COPY package.json package-lock.json ./
-RUN npm ci
-COPY resources/ resources/
-COPY vite.config.js tailwind.config.js postcss.config.js ./
-RUN npm run build
-
-# ============================================
-# Production image
-# ============================================
-FROM base AS production
-
-# Copy Nginx config
-COPY docker/nginx.conf /etc/nginx/http.d/default.conf
-
-# Copy Supervisor config
-COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
-# Copy PHP production config
-COPY docker/php.ini /usr/local/etc/php/conf.d/99-production.ini
-
-# Copy application
+# Copy the full application source
 COPY . /var/www/html/
 
-# Copy Composer dependencies
-COPY --from=composer-deps /var/www/html/vendor /var/www/html/vendor
+# Copy Composer vendor from stage 2
+COPY --from=composer-deps /app/vendor /var/www/html/vendor
 
-# Copy built assets
-COPY --from=node-build /var/www/html/public/build /var/www/html/public/build
+# Copy pre-compiled Vite frontend assets from stage 1
+COPY --from=node-build /app/public/build /var/www/html/public/build
 
-# Generate optimized autoloader
-RUN composer dump-autoload --optimize --no-dev
+# Dump optimized autoloader now that source is present
+RUN composer dump-autoload --optimize --no-dev --no-scripts
 
-# Set permissions
+# Set correct storage permissions
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Copy and set entrypoint
-COPY docker/start.sh /usr/local/bin/start.sh
+# Copy entrypoint script from deploy/docker/
+COPY deploy/docker/start.sh /usr/local/bin/start.sh
 RUN chmod +x /usr/local/bin/start.sh
 
 EXPOSE 80
