@@ -1,5 +1,5 @@
 services:
-  # Web Application Service — Standard Plan (Production-Grade)
+  # Web Application Service — Standard Plan (Production-Grade, Paid)
   - type: web
     name: uew-digital-library
     runtime: docker
@@ -79,11 +79,14 @@ services:
       mountPath: /var/www/html/storage/app/public
       sizeGB: 10
 
-# Managed PostgreSQL Database — Pro Plan (1 GB RAM, Production-Grade)
+# Managed PostgreSQL Database — basic-1gb Plan (Paid, Production-Grade)
+# Render current valid plan identifiers: free, basic-256mb, basic-1gb, standard-4gb, pro-8gb, etc.
+# Use the Render Dashboard > New PostgreSQL to confirm available plans for your workspace.
 databases:
   - name: uew-library-db
     databaseName: uew_library
     user: uew_admin
     region: frankfurt
-    plan: pro-1gb
+    plan: basic-1gb
+    diskSizeGB: 10
     postgresMajorVersion: 16
