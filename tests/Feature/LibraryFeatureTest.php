@@ -437,4 +437,74 @@ class LibraryFeatureTest extends TestCase
             return $mail->hasTo('admin@uew.edu.gh');
         });
     }
+
+    public function test_document_uploads_handle_binary_payloads_without_500_error(): void
+    {
+        Storage::fake('public');
+
+        // Test Student Contribution with simulated PDF binary bytes
+        $student = User::where('email', 'student@st.uew.edu.gh')->first();
+        $category = Category::first();
+        $pdfContent = "%PDF-1.4\n%\xE2\xE3\xCF\xD3\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF";
+        $fakePdf = UploadedFile::fake()->createWithContent('financial_accounting_notes.pdf', $pdfContent);
+
+        $studentResponse = $this->actingAs($student)->post('/student/contribute', [
+            'title' => 'Binary Robustness Student Slide',
+            'type' => 'SLIDE',
+            'category_id' => $category->id,
+            'level' => 'L200',
+            'academic_year' => '2023/2024',
+            'file' => $fakePdf,
+        ]);
+
+        $studentResponse->assertRedirect('/student/hub');
+        $studentResponse->assertSessionHas('success');
+        $this->assertDatabaseHas('resources', [
+            'title' => 'Binary Robustness Student Slide',
+            'status' => 'PENDING_REVIEW',
+        ]);
+
+        // Test Admin Direct Upload
+        $admin = User::where('email', 'admin@uew.edu.gh')->first();
+        $adminFile = UploadedFile::fake()->createWithContent('past_question_scan.png', "\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR");
+
+        $adminResponse = $this->actingAs($admin)->post('/admin/resources', [
+            'title' => 'Administrative Business Exam 2024',
+            'type' => 'PAST_QUESTION',
+            'category_id' => $category->id,
+            'level' => 'L300',
+            'academic_year' => '2023/2024',
+            'semester' => 'FIRST',
+            'status' => 'APPROVED',
+            'file' => $adminFile,
+        ]);
+
+        $adminResponse->assertRedirect(route('admin.resources.index'));
+        $adminResponse->assertSessionHas('success');
+        $this->assertDatabaseHas('resources', [
+            'title' => 'Administrative Business Exam 2024',
+            'status' => 'APPROVED',
+        ]);
+    }
+
+    public function test_mobile_navbar_components_render_cleanly(): void
+    {
+        // 1. Guest View
+        $guestResponse = $this->get('/');
+        $guestResponse->assertStatus(200);
+        $guestResponse->assertSee('mobileMenuOpen');
+        $guestResponse->assertSee('Academic Programs');
+        $guestResponse->assertSee('Catalog Explorer');
+
+        // 2. Authenticated Student View
+        $student = User::where('email', 'student@st.uew.edu.gh')->first();
+        $authResponse = $this->actingAs($student)->get('/student/hub');
+        $authResponse->assertStatus(200);
+        $authResponse->assertSee('mobileMenuOpen = false', false);
+        $authResponse->assertSee('My Study Hub');
+        $authResponse->assertSee('Programs');
+        $authResponse->assertSee('+ Submit');
+        $authResponse->assertSee('Kwame Mensah');
+        $authResponse->assertSee('pts');
+    }
 }

@@ -61,69 +61,103 @@ class ResourceController extends Controller
             'level' => ['required', Rule::in(['L100', 'L200', 'L300', 'L400', 'MASTERS', 'PHD'])],
             'week' => ['nullable', 'integer', 'between:1,15'],
             'academic_year' => ['required', 'string', 'max:20'],
-            'file' => ['required', 'file', 'mimes:pdf,ppt,pptx,doc,docx,zip', 'max:102400'], // 100MB max
+            'file' => ['required', 'file', 'mimes:pdf,ppt,pptx,doc,docx,zip,jpg,jpeg,png', 'max:102400'], // 100MB max
             'tags' => ['nullable', 'string'],
         ]);
 
-        $file = $request->file('file');
-        $fileName = $file->getClientOriginalName();
-        $filePath = $file->store('resources', 'public');
-        $fileBlob = file_get_contents($file->getRealPath());
-        $fileSize = $file->getSize();
-        $mimeType = $file->getMimeType();
+        $filePath = null;
 
-        // Parse tags
-        $tagsArray = [];
-        if (! empty($validated['tags'])) {
-            $tagsArray = array_map('trim', explode(',', $validated['tags']));
-        }
+        try {
+            $file = $request->file('file');
+            $fileName = $file->getClientOriginalName();
+            $fileSize = $file->getSize();
+            $mimeType = $file->getMimeType() ?: 'application/octet-stream';
 
-        $resource = Resource::create([
-            'title' => $validated['title'],
-            'description' => $validated['description'],
-            'type' => $validated['type'],
-            'status' => 'APPROVED',
-            'category_id' => $validated['category_id'],
-            'level' => $validated['level'],
-            'week' => $validated['week'] ?? null,
-            'academic_year' => $validated['academic_year'],
-            'file_name' => $fileName,
-            'file_path' => $filePath,
-            'file_blob' => $fileBlob,
-            'file_size' => $fileSize,
-            'mime_type' => $mimeType,
-            'downloads' => 0,
-            'average_rating' => 0.00,
-            'total_reviews' => 0,
-            'uploaded_by' => $request->user()->id,
-            'tags' => $tagsArray,
-        ]);
+            // 1. Store on persistent public disk
+            $filePath = $file->store('resources', 'public');
 
-        // Send alerts to students who have new_resource_alerts active and matching level
-        $studentsToNotify = User::where('role', 'student')
-            ->where('is_active', true)
-            ->where('new_resource_alerts', true)
-            ->where('level', $validated['level'])
-            ->get();
+            // 2. Prepare binary blob safely for files <= 8MB (avoids DB packet limits & memory issues)
+            $fileBlob = null;
+            if ($fileSize <= 8 * 1024 * 1024) {
+                try {
+                    $raw = file_get_contents($file->getRealPath());
+                    $fileBlob = Resource::prepareBlobForStorage($raw);
+                } catch (\Throwable $blobEx) {
+                    \Illuminate\Support\Facades\Log::warning('Could not read binary blob for admin resource: ' . $blobEx->getMessage());
+                    $fileBlob = null;
+                }
+            }
 
-        foreach ($studentsToNotify as $student) {
-            Notification::create([
-                'user_id' => $student->id,
-                'type' => 'NEW_RESOURCE',
-                'title' => "New {$validated['type']} Uploaded: {$validated['title']}",
-                'message' => "New material is now available in your {$resource->category->course_code} course catalog.",
-                'resource_id' => $resource->id,
-                'link' => route('resources.show', $resource),
-                'is_read' => false,
+            // Parse tags
+            $tagsArray = [];
+            if (! empty($validated['tags'])) {
+                $tagsArray = array_map('trim', explode(',', $validated['tags']));
+            }
+
+            $resource = Resource::create([
+                'title' => $validated['title'],
+                'description' => $validated['description'] ?? null,
+                'type' => $validated['type'],
+                'status' => 'APPROVED',
+                'category_id' => $validated['category_id'],
+                'level' => $validated['level'],
+                'week' => $validated['week'] ?? null,
+                'academic_year' => $validated['academic_year'],
+                'file_name' => $fileName,
+                'file_path' => $filePath ?: 'resources/' . $fileName,
+                'file_blob' => $fileBlob,
+                'file_size' => $fileSize,
+                'mime_type' => $mimeType,
+                'downloads' => 0,
+                'average_rating' => 0.00,
+                'total_reviews' => 0,
+                'uploaded_by' => $request->user()->id,
+                'tags' => $tagsArray,
             ]);
+
+            // Send alerts to students safely
+            try {
+                $studentsToNotify = User::where('role', 'student')
+                    ->where('is_active', true)
+                    ->where('new_resource_alerts', true)
+                    ->where('level', $validated['level'])
+                    ->get();
+
+                foreach ($studentsToNotify as $student) {
+                    Notification::create([
+                        'user_id' => $student->id,
+                        'type' => 'NEW_RESOURCE',
+                        'title' => "New {$validated['type']} Uploaded: {$validated['title']}",
+                        'message' => "New material is now available in your {$resource->category->course_code} course catalog.",
+                        'resource_id' => $resource->id,
+                        'link' => route('resources.show', $resource),
+                        'is_read' => false,
+                    ]);
+                }
+            } catch (\Throwable $notifEx) {
+                \Illuminate\Support\Facades\Log::warning('Student notifications skipped: ' . $notifEx->getMessage());
+            }
+
+            ActivityLog::record('RESOURCE_UPLOAD', $request->user(), $resource, [
+                'file_name' => $fileName,
+                'file_size' => $fileSize,
+            ]);
+
+            return redirect()->route('admin.resources.index')->with('success', 'Resource uploaded and published successfully.');
+
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Admin resource upload failed: ' . $e->getMessage(), [
+                'exception' => get_class($e),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            if ($filePath && Storage::disk('public')->exists($filePath)) {
+                Storage::disk('public')->delete($filePath);
+            }
+
+            return back()->withInput()->with('error', 'Unable to upload resource: ' . $e->getMessage());
         }
-
-        ActivityLog::record('RESOURCE_UPLOAD', $request->user(), $resource, [
-            'file_name' => $fileName,
-            'file_size' => $fileSize,
-        ]);
-
-        return redirect()->route('admin.resources.index')->with('success', 'Resource uploaded successfully!');
     }
 
     public function edit(Resource $resource): View

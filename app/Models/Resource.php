@@ -206,4 +206,48 @@ class Resource extends Model
             get: fn () => $this->week ? "Week {$this->week}" : 'General / Exam'
         );
     }
+
+    /**
+     * Safely format binary data for database blob insertion.
+     * In PostgreSQL, raw binary strings passed via PDO throw UTF-8 encoding exceptions
+     * unless encoded as hex string with the \x prefix.
+     */
+    public static function prepareBlobForStorage(?string $binary): ?string
+    {
+        if ($binary === null || $binary === '') {
+            return null;
+        }
+
+        try {
+            $isPgsql = config('database.default') === 'pgsql' || 
+                       (class_exists(\Illuminate\Support\Facades\DB::class) && \Illuminate\Support\Facades\DB::connection()->getDriverName() === 'pgsql');
+
+            if ($isPgsql) {
+                return '\x' . bin2hex($binary);
+            }
+        } catch (\Throwable) {
+            // fallback
+        }
+
+        return $binary;
+    }
+
+    /**
+     * Decode binary blob from database into raw bytes.
+     */
+    public function getRawBlob(): ?string
+    {
+        if (empty($this->file_blob)) {
+            return null;
+        }
+
+        $raw = is_resource($this->file_blob) ? stream_get_contents($this->file_blob) : $this->file_blob;
+
+        if (is_string($raw) && str_starts_with($raw, '\x')) {
+            $decoded = @hex2bin(substr($raw, 2));
+            return $decoded !== false ? $decoded : $raw;
+        }
+
+        return $raw;
+    }
 }

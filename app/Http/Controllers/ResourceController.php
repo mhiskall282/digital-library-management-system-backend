@@ -88,8 +88,8 @@ class ResourceController extends Controller
         ]);
 
         // 1. Direct High-Performance Blob Stream (Memory Efficient)
-        if (! empty($resource->file_blob)) {
-            $blob = is_resource($resource->file_blob) ? stream_get_contents($resource->file_blob) : $resource->file_blob;
+        $blob = $resource->getRawBlob();
+        if (! empty($blob)) {
             return response($blob, 200, [
                 'Content-Type' => $resource->mime_type ?: 'application/pdf',
                 'Content-Disposition' => 'attachment; filename="' . $resource->file_name . '"',
@@ -156,8 +156,8 @@ class ResourceController extends Controller
         }
 
         // Direct High-Performance Blob Stream
-        if (! empty($resource->file_blob)) {
-            $blob = is_resource($resource->file_blob) ? stream_get_contents($resource->file_blob) : $resource->file_blob;
+        $blob = $resource->getRawBlob();
+        if (! empty($blob)) {
             return response($blob, 200, [
                 'Content-Type' => $resource->mime_type ?: 'application/pdf',
                 'Content-Disposition' => 'inline; filename="' . $resource->file_name . '"',
