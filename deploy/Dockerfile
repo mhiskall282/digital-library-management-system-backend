@@ -48,6 +48,10 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install -j$(nproc) \
     pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd intl opcache xml
 
+# Copy Composer binary into production stage
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+ENV COMPOSER_ALLOW_SUPERUSER=1
+
 # Copy Nginx, Supervisor, PHP config from deploy/docker/
 COPY deploy/docker/nginx.conf        /etc/nginx/http.d/default.conf
 COPY deploy/docker/supervisord.conf  /etc/supervisor/conf.d/supervisord.conf
