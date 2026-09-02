@@ -18,6 +18,7 @@ class Category extends Model
         'course_name',
         'level',
         'semester',
+        'program',
         'description',
     ];
 

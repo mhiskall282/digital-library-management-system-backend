@@ -83,10 +83,24 @@ class HomeController extends Controller
 
     public function programs(): View
     {
-        $programsCatalog = $this->recommendationService->getProgramsCatalog();
-        $totalCourses = Category::count();
-        $totalResources = Resource::approved()->count();
+        try {
+            $programsCatalog = $this->recommendationService->getProgramsCatalog();
+            $totalCourses = Category::count();
+            $totalResources = Resource::approved()->count();
 
-        return view('programs.index', compact('programsCatalog', 'totalCourses', 'totalResources'));
+            return view('programs.index', compact('programsCatalog', 'totalCourses', 'totalResources'));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Error rendering programs catalog: ' . $e->getMessage(), [
+                'exception' => get_class($e),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            $programsCatalog = [];
+            $totalCourses = 0;
+            $totalResources = 0;
+
+            return view('programs.index', compact('programsCatalog', 'totalCourses', 'totalResources'));
+        }
     }
 }

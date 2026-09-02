@@ -22,11 +22,13 @@ if [ -n "$DB_HOST" ] && [ "$DB_CONNECTION" = "pgsql" ]; then
     echo "Database connectivity confirmed."
 fi
 
-# 3. Cache configuration, routes, and views for optimal performance
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-php artisan event:cache
+# 3. Create required runtime storage and log directories
+mkdir -p /var/www/html/storage/app/public \
+         /var/www/html/storage/framework/cache/data \
+         /var/www/html/storage/framework/sessions \
+         /var/www/html/storage/framework/views \
+         /var/www/html/storage/logs \
+         /var/www/html/bootstrap/cache
 
 # 4. Run database migrations safely
 echo "Running database migrations..."
@@ -37,6 +39,17 @@ php artisan db:seed --force || true
 
 # 6. Create storage symlink
 php artisan storage:link || true
+
+# 7. Cache configuration, routes, and views for optimal performance
+php artisan config:cache || true
+php artisan route:cache || true
+php artisan view:cache || true
+php artisan event:cache || true
+
+# 8. Ensure www-data strictly owns all storage and cache directories at runtime
+echo "Setting runtime storage permissions for www-data..."
+chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
 echo "=== Starting Supervisor (Nginx + PHP-FPM) ==="
 exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
