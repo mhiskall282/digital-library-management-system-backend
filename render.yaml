@@ -1,0 +1,73 @@
+services:
+  # Web Application Service
+  - type: web
+    name: uew-digital-library
+    runtime: docker
+    dockerfilePath: ./deploy/Dockerfile
+    dockerContext: .
+    plan: starter
+    region: frankfurt
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /health
+    envVars:
+      - key: APP_NAME
+        value: "UEW Digital Library"
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_KEY
+        generateValue: true
+      - key: APP_URL
+        fromService:
+          type: web
+          name: uew-digital-library
+          property: host
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: uew-library-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: uew-library-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: uew-library-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: uew-library-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: uew-library-db
+          property: password
+      - key: SESSION_DRIVER
+        value: database
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: sync
+      - key: FILESYSTEM_DISK
+        value: local
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: info
+    disk:
+      name: uew-library-storage
+      mountPath: /var/www/html/storage/app/public
+      sizeGB: 10
+
+# Managed PostgreSQL Database
+databases:
+  - name: uew-library-db
+    databaseName: uew_library
+    user: uew_admin
+    region: frankfurt
+    plan: starter
+    postgresMajorVersion: 16

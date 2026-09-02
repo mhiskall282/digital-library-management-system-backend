@@ -1,0 +1,43 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../views/**/*.blade.php';
+
+@theme {
+    --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+    --color-uew-scarlet: #C41E3A;
+    --color-uew-scarlet-hover: #A0182E;
+    --color-uew-scarlet-light: #FDF2F4;
+    --color-uew-navy: #1E3A8A;
+    --color-uew-navy-hover: #172554;
+    --color-uew-navy-dark: #0F172A;
+    --color-uew-navy-light: #EFF6FF;
+    --color-uew-navy-muted: #1E293B;
+    --color-uew-amber: #F59E0B;
+    --color-uew-amber-light: #FEF3C7;
+    --color-uew-emerald: #10B981;
+    --color-uew-emerald-light: #D1FAE5;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #F1F5F9;
+}
+::-webkit-scrollbar-thumb {
+    background: #CBD5E1;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94A3B8;
+}
+
+[x-cloak] {
+    display: none !important;
+}

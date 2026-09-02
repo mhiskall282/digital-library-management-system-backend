@@ -1,0 +1,58 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile
+    container_name: uew_digital_library_app
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      APP_NAME: "UEW Digital Library"
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_KEY: "base64:6MsNsV445Nu736a1nFYqt1cNboYaJQJZk/nv7FTp9K4="
+      APP_URL: "http://localhost:8080"
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: uew_library
+      DB_USERNAME: uew_user
+      DB_PASSWORD: uew_password
+      SESSION_DRIVER: database
+      QUEUE_CONNECTION: sync
+      MAIL_MAILER: smtp
+      MAIL_HOST: mailpit
+      MAIL_PORT: 1025
+      MAIL_FROM_ADDRESS: "noreply@uew.edu.gh"
+      MAIL_FROM_NAME: "UEW Digital Library"
+    depends_on:
+      - postgres
+      - mailpit
+    volumes:
+      - storage_data:/var/www/html/storage/app
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: uew_library_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: uew_library
+      POSTGRES_USER: uew_user
+      POSTGRES_PASSWORD: uew_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: uew_library_mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025" # SMTP port
+      - "8025:8025" # Web UI port
+
+volumes:
+  pgdata:
+  storage_data:
