@@ -211,31 +211,28 @@
             </div>
         </div>
 
-        <!-- Mobile Drawer with Backdrop -->
+        <!-- Mobile Navigation Backdrop Overlay -->
         <div x-show="mobileMenuOpen" 
-             class="fixed inset-0 top-16 z-50 md:hidden flex flex-col"
-             x-cloak>
-            
-            <!-- Backdrop Overlay -->
-            <div x-show="mobileMenuOpen"
-                 x-transition:enter="transition-opacity ease-out duration-200"
-                 x-transition:enter-start="opacity-0"
-                 x-transition:enter-end="opacity-100"
-                 x-transition:leave="transition-opacity ease-in duration-150"
-                 x-transition:leave-start="opacity-100"
-                 x-transition:leave-end="opacity-0"
-                 @click="mobileMenuOpen = false"
-                 class="fixed inset-0 bg-slate-950/40 backdrop-blur-xs"></div>
+             x-transition:enter="transition-opacity ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition-opacity ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             @click="mobileMenuOpen = false" 
+             class="fixed inset-0 top-16 bg-slate-950/50 backdrop-blur-xs md:hidden z-40" 
+             x-cloak></div>
 
-            <!-- Drawer Container -->
-            <div x-show="mobileMenuOpen" 
-                 x-transition:enter="transition ease-out duration-200" 
-                 x-transition:enter-start="opacity-0 -translate-y-3" 
-                 x-transition:enter-end="opacity-100 translate-y-0" 
-                 x-transition:leave="transition ease-in duration-150" 
-                 x-transition:leave-start="opacity-100 translate-y-0" 
-                 x-transition:leave-end="opacity-0 -translate-y-3" 
-                 class="relative bg-white border-b border-slate-200 shadow-2xl rounded-b-3xl px-4 pt-3 pb-6 max-h-[82vh] overflow-y-auto space-y-4">
+        <!-- Mobile Navigation Dropdown Menu -->
+        <div x-show="mobileMenuOpen" 
+             x-transition:enter="transition ease-out duration-200" 
+             x-transition:enter-start="opacity-0 -translate-y-2" 
+             x-transition:enter-end="opacity-100 translate-y-0" 
+             x-transition:leave="transition ease-in duration-150" 
+             x-transition:leave-start="opacity-100 translate-y-0" 
+             x-transition:leave-end="opacity-0 -translate-y-2" 
+             class="absolute top-full inset-x-0 bg-white border-b border-slate-200 shadow-2xl rounded-b-3xl px-4 pt-3 pb-6 max-h-[calc(100vh-4.5rem)] overflow-y-auto space-y-4 md:hidden z-50" 
+             x-cloak>
                 
                 @auth
                     <!-- Mobile User Snapshot Card -->
