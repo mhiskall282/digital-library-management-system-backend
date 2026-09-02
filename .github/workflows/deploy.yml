@@ -36,7 +36,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Copy .env file
         run: php -r "file_exists('.env') || copy('.env.example', '.env');"
@@ -49,7 +49,7 @@ jobs:
 
       - name: Install Node Dependencies & Build Assets
         run: |
-          npm ci
+          npm ci --legacy-peer-deps
           npm run build
 
       - name: Run Database Migrations on PostgreSQL
