@@ -15,14 +15,11 @@
     <!-- Tailwind / Vite Assets -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    <!-- Alpine.js fallback CDN if needed -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
-
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
     </style>
 </head>
-<body class="flex flex-col min-h-full text-slate-800 antialiased selection:bg-uew-scarlet selection:text-white" x-data="{ mobileMenuOpen: false }">
+<body class="flex flex-col min-h-full text-slate-800 antialiased selection:bg-uew-scarlet selection:text-white">
 
     <!-- Top University Banner Stripe -->
     <div class="bg-gradient-to-r from-uew-scarlet via-red-700 to-uew-navy text-white text-xs py-1.5 px-4">
