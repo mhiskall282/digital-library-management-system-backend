@@ -85,11 +85,13 @@ class MaterialRequestController extends Controller
 
         $materialRequest->update($validated);
 
+        $note = !empty($validated['admin_notes']) ? " Note: {$validated['admin_notes']}" : '';
+
         Notification::create([
             'user_id' => $materialRequest->user_id,
             'type' => 'SYSTEM',
             'title' => "Material Request Update: {$materialRequest->course_code}",
-            'message' => "Status changed to {$materialRequest->status}." . ($validated['admin_notes'] ? " Note: {$validated['admin_notes']}" : ''),
+            'message' => "Status changed to {$materialRequest->status}." . $note,
             'link' => route('requests.index'),
             'is_read' => false,
         ]);

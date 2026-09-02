@@ -186,7 +186,7 @@ class ResourceController extends Controller
 
         $resource->update([
             'title' => $validated['title'],
-            'description' => $validated['description'],
+            'description' => $validated['description'] ?? null,
             'type' => $validated['type'],
             'category_id' => $validated['category_id'],
             'level' => $validated['level'],
