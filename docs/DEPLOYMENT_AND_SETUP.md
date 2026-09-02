@@ -134,7 +134,25 @@ exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
 
 ---
 
-## 6. Local Development
+## 6. SSL Reverse Proxy & Mixed Content Prevention
+
+When deploying on Render, AWS, or Cloudflare, the edge load balancer terminates SSL and proxies unencrypted traffic to Nginx on port 80. To prevent browsers from blocking CSS/JS as mixed content:
+
+1. **Trusted Proxies (`bootstrap/app.php`)**:
+   `$middleware->trustProxies(at: '*');` ensures Laravel reads `X-Forwarded-Proto: https` from Render.
+2. **Forced HTTPS Scheme (`app/Providers/AppServiceProvider.php`)**:
+   `URL::forceScheme('https')` guarantees all `@vite` assets, preloads, route links, and form actions render as `https://`.
+3. **Browser CSP Auto-Upgrade**:
+   Every Blade layout includes:
+   ```html
+   <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+   ```
+4. **Nginx FastCGI Forwarding (`deploy/docker/nginx.conf`)**:
+   Nginx passes `HTTP_X_FORWARDED_PROTO`, `HTTP_X_FORWARDED_PORT 443`, and `HTTPS on` directly to PHP-FPM.
+
+---
+
+## 7. Local Development
 
 ### Option A — Native PHP (Recommended for Development)
 ```bash

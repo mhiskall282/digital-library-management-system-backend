@@ -95,6 +95,18 @@ The Admin Audit Logs page (`/admin/reports`) allows filtering by event type, dat
 
 ---
 
+## 7. Transport Layer Security & Mixed Content Prevention
+
+| Control | Implementation |
+|---------|---------------|
+| Reverse Proxy Trust | `bootstrap/app.php` sets `$middleware->trustProxies(at: '*')` to honor `X-Forwarded-Proto` |
+| Force HTTPS Scheme | `AppServiceProvider` executes `URL::forceScheme('https')` in production |
+| Content Security Policy | `<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">` in all layouts |
+| Nginx Reverse Proxy Headers | Nginx passes `HTTP_X_FORWARDED_PROTO`, `HTTP_X_FORWARDED_PORT 443`, and `HTTPS on` |
+| Session Cookie Security | `Secure` and `HttpOnly` flags active in production session configurations |
+
+---
+
 ## 7. SQL Injection Prevention
 
 All database interactions use Eloquent ORM and the Query Builder with parameterized bindings. No raw SQL strings with user input. Example:
