@@ -74,6 +74,33 @@ class LibraryFeatureTest extends TestCase
         $this->assertAuthenticated();
     }
 
+    public function test_student_registration_flow_and_welcome_email_logging(): void
+    {
+        $response = $this->post('/register', [
+            'first_name' => 'Abena',
+            'last_name' => 'Osei',
+            'student_id' => '5201049999',
+            'email' => 'abena.osei@st.uew.edu.gh',
+            'password' => 'SecurePass123!',
+            'password_confirmation' => 'SecurePass123!',
+            'level' => 'L200',
+            'program' => 'BSc. Business Information Systems (BIS)',
+        ]);
+
+        $response->assertRedirect('/dashboard');
+        $this->assertAuthenticated();
+        $this->assertDatabaseHas('users', [
+            'email' => 'abena.osei@st.uew.edu.gh',
+            'student_id' => '5201049999',
+            'program' => 'BSc. Business Information Systems (BIS)',
+        ]);
+        $this->assertDatabaseHas('email_logs', [
+            'direction' => 'outgoing',
+            'recipient' => 'abena.osei@st.uew.edu.gh',
+            'template' => 'welcome',
+        ]);
+    }
+
     public function test_student_can_view_student_hub(): void
     {
         $student = User::where('email', 'student@st.uew.edu.gh')->first();
@@ -327,5 +354,42 @@ class LibraryFeatureTest extends TestCase
         $response = $this->actingAs($admin)->get('/admin/mail-studio');
         $response->assertStatus(200)
                  ->assertSee('Email Templates &amp; Dispatch Studio', false);
+    }
+
+    public function test_admin_can_simulate_email_dispatch(): void
+    {
+        $admin = User::where('email', 'admin@uew.edu.gh')->first();
+
+        $response = $this->actingAs($admin)->post('/admin/mail-studio/send', [
+            'template' => 'welcome',
+            'recipient' => 'test@johnokyere.xyz',
+            'mode' => 'simulate',
+        ]);
+
+        $response->assertRedirect('/admin/mail-studio?template=welcome&tab=mailbox');
+        $this->assertDatabaseHas('email_logs', [
+            'direction' => 'outgoing',
+            'mailer' => 'simulated',
+            'template' => 'welcome',
+            'recipient' => 'test@johnokyere.xyz',
+        ]);
+    }
+
+    public function test_admin_can_simulate_incoming_email(): void
+    {
+        $admin = User::where('email', 'admin@uew.edu.gh')->first();
+
+        $response = $this->actingAs($admin)->post('/admin/mail-studio/simulate-incoming', [
+            'sender' => 'student.test@uew.edu.gh',
+            'subject' => 'Inquiry Regarding Course Material',
+            'message' => 'Please confirm if my upload was approved.',
+        ]);
+
+        $response->assertRedirect('/admin/mail-studio?tab=mailbox');
+        $this->assertDatabaseHas('email_logs', [
+            'direction' => 'incoming',
+            'sender' => 'student.test@uew.edu.gh',
+            'subject' => 'Inquiry Regarding Course Material',
+        ]);
     }
 }

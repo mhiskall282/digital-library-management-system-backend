@@ -139,18 +139,26 @@ Students filter the Catalog Explorer by week using the `scopeFilterByWeek` scope
 
 ---
 
-## 7. Email Notification System (Zoho SMTP)
+## 7. Dual-Mode Email & In-App Simulation Architecture
 
-Three branded institutional email templates:
+Three branded institutional email templates with dual delivery pathways:
 
 | Mailable | Template | Trigger |
 |----------|----------|---------|
-| `WelcomeActivationMail` | `emails/auth/welcome-activation` | New account created |
+| `WelcomeActivationMail` | `emails/auth/welcome-activation` | New student account created |
 | `SecurityAlertMail` | `emails/security/alert` | Password reset, suspicious login |
 | `AdminBroadcastMail` | `emails/admin/broadcast` | Departmental announcement to all users |
 
-**SMTP Provider**: Zoho Mail — `smtppro.zoho.com:465 (SSL)`
-**Admin Test Studio**: `/admin/mail-studio`
+### Dual Delivery Modes:
+1. **Live SMTP (Zoho Mail)**: Configured for `smtppro.zoho.com:465 (SSL)`.
+2. **In-App Simulator & Telemetry Mailbox**:
+   - Dispatches are automatically recorded to the `email_logs` table.
+   - If external SMTP fails (e.g. Zoho `554 5.7.8` due to free account IMAP/POP3 restrictions), the system gracefully archives the full HTML email to the In-App Mailbox with diagnostic explanations.
+   - Admins can inspect full rendered HTML, headers, and status in `/admin/mail-studio`.
+   - Inbound simulation allows testing student replies and inquiries without requiring premium mail server packages.
+
+**Admin Test Studio**: `/admin/mail-studio`  
+**CLI Diagnostic**: `php tests/zoho_smtp_diagnostic.php`  
 **CLI Test**: `php artisan mail:test-templates [--smtp]`
 
 ---

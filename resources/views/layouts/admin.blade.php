@@ -133,6 +133,11 @@
                    class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('admin.broadcasts.*') ? 'bg-uew-scarlet text-white font-bold shadow-xs' : 'text-slate-300 hover:text-white hover:bg-slate-800/60' }}">
                     <span>📢 Broadcast Announcements</span>
                 </a>
+
+                <a href="{{ route('admin.mail.index') }}" 
+                   class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('admin.mail.*') ? 'bg-uew-scarlet text-white font-bold shadow-xs' : 'text-slate-300 hover:text-white hover:bg-slate-800/60' }}">
+                    <span>✉️ Email Studio &amp; Simulator</span>
+                </a>
             </div>
 
             <!-- Group 5: System & Settings -->

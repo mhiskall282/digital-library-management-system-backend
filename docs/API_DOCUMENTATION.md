@@ -139,8 +139,11 @@ Protected by `auth` + admin role middleware:
 |--------|-----|------|-------------|
 | `GET` | `/admin/broadcasts` | `admin.broadcasts.create` | Compose broadcast announcement |
 | `POST` | `/admin/broadcasts` | `admin.broadcasts.store` | Send broadcast to all users via Zoho SMTP |
-| `GET` | `/admin/mail-studio` | `admin.mail.index` | Email template preview & live SMTP test dispatch studio |
-| `POST` | `/admin/mail-studio/send` | `admin.mail.send` | Trigger test email dispatch |
+| `GET` | `/admin/mail-studio` | `admin.mail.index` | Email template preview, in-app mailbox, & dispatch studio |
+| `POST` | `/admin/mail-studio/send` | `admin.mail.send` | Trigger test email dispatch (live SMTP or simulated) |
+| `POST` | `/admin/mail-studio/simulate-incoming` | `admin.mail.simulate-incoming` | Simulate receiving an inbound student/staff message |
+| `GET` | `/admin/mail-studio/logs/{id}` | `admin.mail.show-log` | Fetch detailed email log with full HTML payload |
+| `DELETE` | `/admin/mail-studio/logs` | `admin.mail.clear-logs` | Clear email simulation logs |
 
 ### Reporting & Audit
 | Method | URI | Name | Description |

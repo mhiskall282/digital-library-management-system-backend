@@ -102,8 +102,14 @@ php artisan mail:test-templates --smtp
 php tests/test_zoho_smtp.php
 ```
 
-### Admin Email Studio
-Visit `/admin/mail-studio` to preview all 3 branded templates in-browser and trigger live SMTP test dispatches to any recipient address.
+### Admin Email Studio & Simulator (`/admin/mail-studio`)
+Visit `/admin/mail-studio` to:
+- **Preview All 3 Branded HTML Templates**: Welcome & Activation, Security Alert, Departmental Broadcast.
+- **Dual-Mode Delivery**:
+  - **⚡ In-App Simulator**: Delivers immediately to the In-App Mailbox tab with zero external mail server dependencies.
+  - **🌐 Live Zoho SMTP**: Dispatches via `smtppro.zoho.com:465`. If Zoho rejects due to account settings (`554 5.7.8`), the system automatically archives the full rendered email in the In-App Mailbox with diagnostic explanations.
+- **Simulate Inbound Correspondence**: Test receiving student inquiries or verification replies without needing expensive IMAP/POP3 subscriptions.
+- **Live HTML Inspector**: Click any logged message to inspect full headers, rendered HTML, and delivery status in a responsive modal.
 
 ---
 

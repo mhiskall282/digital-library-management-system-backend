@@ -63,6 +63,34 @@ class RegisterController extends Controller
             'is_read' => false,
         ]);
 
+        // Dispatch or record welcome email
+        try {
+            $welcomeMailable = new \App\Mail\WelcomeActivationMail($user, 'Account Activated');
+            \Illuminate\Support\Facades\Mail::to($user->email)->send($welcomeMailable);
+            \App\Models\EmailLog::create([
+                'direction' => 'outgoing',
+                'mailer' => config('mail.default', 'smtp'),
+                'template' => 'welcome',
+                'recipient' => $user->email,
+                'sender' => config('mail.from.address', 'test@johnokyere.xyz'),
+                'subject' => 'Welcome to the UEW School of Business Digital Library',
+                'body_html' => $welcomeMailable->render(),
+                'status' => 'delivered',
+            ]);
+        } catch (\Throwable $e) {
+            \App\Models\EmailLog::create([
+                'direction' => 'outgoing',
+                'mailer' => 'simulated',
+                'template' => 'welcome',
+                'recipient' => $user->email,
+                'sender' => config('mail.from.address', 'test@johnokyere.xyz'),
+                'subject' => 'Welcome to the UEW School of Business Digital Library',
+                'body_html' => (new \App\Mail\WelcomeActivationMail($user, 'Account Activated'))->render(),
+                'status' => 'simulated',
+                'error_message' => $e->getMessage(),
+            ]);
+        }
+
         ActivityLog::record('REGISTER', $user, null);
 
         return redirect()->route('dashboard')->with('success', 'Account created successfully! Welcome to the UEW School of Business Digital Library.');

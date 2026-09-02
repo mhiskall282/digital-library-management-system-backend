@@ -81,12 +81,14 @@
                 Program of Study
             </label>
             <select id="program" name="program" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-uew-scarlet focus:border-uew-scarlet bg-white">
+                <option value="BSc. Business Information Systems (BIS)" {{ old('program') == 'BSc. Business Information Systems (BIS)' ? 'selected' : '' }}>BSc. Business Information Systems (BIS)</option>
                 <option value="BSc. Accounting" {{ old('program') == 'BSc. Accounting' ? 'selected' : '' }}>BSc. Accounting</option>
+                <option value="BSc. Banking and Finance" {{ old('program') == 'BSc. Banking and Finance' ? 'selected' : '' }}>BSc. Banking &amp; Finance</option>
                 <option value="BBA. Marketing" {{ old('program') == 'BBA. Marketing' ? 'selected' : '' }}>BBA. Marketing</option>
-                <option value="BBA. Human Resource Management" {{ old('program') == 'BBA. Human Resource Management' ? 'selected' : '' }}>BBA. Human Resource</option>
-                <option value="BSc. Banking and Finance" {{ old('program') == 'BSc. Banking and Finance' ? 'selected' : '' }}>BSc. Banking & Finance</option>
-                <option value="BSc. Procurement & Supply Chain" {{ old('program') == 'BSc. Procurement & Supply Chain' ? 'selected' : '' }}>BSc. Procurement</option>
+                <option value="BBA. Human Resource Management" {{ old('program') == 'BBA. Human Resource Management' ? 'selected' : '' }}>BBA. Human Resource Management</option>
+                <option value="BSc. Procurement & Supply Chain" {{ old('program') == 'BSc. Procurement & Supply Chain' ? 'selected' : '' }}>BSc. Procurement &amp; Supply Chain</option>
                 <option value="MBA. Strategic Management" {{ old('program') == 'MBA. Strategic Management' ? 'selected' : '' }}>MBA. Strategic Management</option>
+                <option value="PhD Business Administration" {{ old('program') == 'PhD Business Administration' ? 'selected' : '' }}>PhD Business Administration</option>
             </select>
         </div>
     </div>

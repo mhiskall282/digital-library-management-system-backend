@@ -141,9 +141,12 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/broadcasts', [AdminBroadcastController::class, 'create'])->name('broadcasts.create');
         Route::post('/broadcasts', [AdminBroadcastController::class, 'store'])->name('broadcasts.store');
 
-        // Email Templates & SMTP Dispatch Studio
+        // Email Templates & SMTP Dispatch Studio & Simulation Mailbox
         Route::get('/mail-studio', [\App\Http\Controllers\Admin\MailTestController::class, 'index'])->name('mail.index');
         Route::post('/mail-studio/send', [\App\Http\Controllers\Admin\MailTestController::class, 'sendTest'])->name('mail.send');
+        Route::post('/mail-studio/simulate-incoming', [\App\Http\Controllers\Admin\MailTestController::class, 'simulateIncoming'])->name('mail.simulate-incoming');
+        Route::get('/mail-studio/logs/{emailLog}', [\App\Http\Controllers\Admin\MailTestController::class, 'showLog'])->name('mail.show-log');
+        Route::delete('/mail-studio/logs', [\App\Http\Controllers\Admin\MailTestController::class, 'clearLogs'])->name('mail.clear-logs');
 
         // System Audit Logs & Compliance Reporting
         Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');
