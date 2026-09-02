@@ -102,12 +102,20 @@ php artisan mail:test-templates --smtp
 php tests/test_zoho_smtp.php
 ```
 
+### Admin Dashboard SMTP Configuration (`/admin/settings`)
+Administrators can configure and update SMTP email credentials directly from the Web UI:
+1. Navigate to `/admin/settings` &rarr; click the **✉️ SMTP & Email Logins** tab.
+2. Select a one-click preset (**⚡ Google Gmail / Workspace**, **✉️ Zoho Mail**, or **📋 Log Driver**), or enter custom SMTP host, port, encryption, username, password, and sender details.
+3. Passwords are saved securely in the database, masked in the UI, and only overwritten when a new password is typed.
+4. Use the **Instant SMTP Connection Ping** card at the bottom to send a real-time verification email to any address with a single click.
+5. All application mail (welcome emails, password resets, announcements) automatically utilizes these database settings in real-time without restarting containers or editing `.env`.
+
 ### Admin Email Studio & Simulator (`/admin/mail-studio`)
 Visit `/admin/mail-studio` to:
 - **Preview All 3 Branded HTML Templates**: Welcome & Activation, Security Alert, Departmental Broadcast.
 - **Dual-Mode Delivery**:
   - **⚡ In-App Simulator**: Delivers immediately to the In-App Mailbox tab with zero external mail server dependencies.
-  - **🌐 Live Zoho SMTP**: Dispatches via `smtppro.zoho.com:465`. If Zoho rejects due to account settings (`554 5.7.8`), the system automatically archives the full rendered email in the In-App Mailbox with diagnostic explanations.
+  - **🌐 Live SMTP**: Dispatches via the configured SMTP gateway (Gmail or Zoho). If rejected by server policy, the system automatically archives the full rendered email in the In-App Mailbox with diagnostic explanations.
 - **Simulate Inbound Correspondence**: Test receiving student inquiries or verification replies without needing expensive IMAP/POP3 subscriptions.
 - **Live HTML Inspector**: Click any logged message to inspect full headers, rendered HTML, and delivery status in a responsive modal.
 

@@ -392,4 +392,49 @@ class LibraryFeatureTest extends TestCase
             'subject' => 'Inquiry Regarding Course Material',
         ]);
     }
+
+    public function test_admin_can_update_email_smtp_settings(): void
+    {
+        $admin = User::where('email', 'admin@uew.edu.gh')->first();
+
+        $response = $this->actingAs($admin)->put('/admin/settings', [
+            'academic_year' => '2023/2024',
+            'active_semester' => 'FIRST',
+            'institution_name' => 'UEW School of Business',
+            'max_upload_size_mb' => 100,
+            'allowed_file_extensions' => 'pdf, docx, pptx',
+            'contact_email' => 'library@uew.edu.gh',
+            'mail_mailer' => 'smtp',
+            'mail_host' => 'smtp.gmail.com',
+            'mail_port' => 587,
+            'mail_encryption' => 'tls',
+            'mail_username' => 'test-admin@uew.edu.gh',
+            'mail_password' => 'mockappkey123456',
+            'mail_from_address' => 'test-admin@uew.edu.gh',
+            'mail_from_name' => 'UEW Business Library',
+        ]);
+
+        $response->assertSessionHas('success');
+        $this->assertEquals('smtp.gmail.com', \App\Models\Setting::get('mail_host'));
+        $this->assertEquals(587, \App\Models\Setting::get('mail_port'));
+        $this->assertEquals('tls', \App\Models\Setting::get('mail_encryption'));
+        $this->assertEquals('test-admin@uew.edu.gh', \App\Models\Setting::get('mail_username'));
+        $this->assertEquals('mockappkey123456', \App\Models\Setting::get('mail_password'));
+    }
+
+    public function test_admin_can_ping_smtp_connection_from_settings(): void
+    {
+        \Illuminate\Support\Facades\Mail::fake();
+
+        $admin = User::where('email', 'admin@uew.edu.gh')->first();
+
+        $response = $this->actingAs($admin)->post('/admin/settings/test-smtp', [
+            'test_recipient' => 'admin@uew.edu.gh',
+        ]);
+
+        $response->assertSessionHas('success');
+        \Illuminate\Support\Facades\Mail::assertSent(\App\Mail\SecurityAlertMail::class, function ($mail) {
+            return $mail->hasTo('admin@uew.edu.gh');
+        });
+    }
 }

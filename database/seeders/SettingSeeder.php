@@ -94,6 +94,64 @@ class SettingSeeder extends Seeder
                 'group' => 'notifications',
                 'description' => 'Administrative contact email for library support requests.',
             ],
+
+            // SMTP Gateway & Email Server Settings
+            [
+                'key' => 'mail_mailer',
+                'value' => 'smtp',
+                'type' => 'string',
+                'group' => 'email_smtp',
+                'description' => 'Active mail driver (smtp or log).',
+            ],
+            [
+                'key' => 'mail_host',
+                'value' => 'smtp.gmail.com',
+                'type' => 'string',
+                'group' => 'email_smtp',
+                'description' => 'SMTP relay hostname (e.g. smtp.gmail.com or smtppro.zoho.com).',
+            ],
+            [
+                'key' => 'mail_port',
+                'value' => '587',
+                'type' => 'integer',
+                'group' => 'email_smtp',
+                'description' => 'SMTP port (587 for TLS, 465 for SSL).',
+            ],
+            [
+                'key' => 'mail_encryption',
+                'value' => 'tls',
+                'type' => 'string',
+                'group' => 'email_smtp',
+                'description' => 'Transport layer encryption (tls or ssl).',
+            ],
+            [
+                'key' => 'mail_username',
+                'value' => env('MAIL_USERNAME', 'johnotchere282@gmail.com'),
+                'type' => 'string',
+                'group' => 'email_smtp',
+                'description' => 'SMTP authenticating username or email address.',
+            ],
+            [
+                'key' => 'mail_password',
+                'value' => env('MAIL_PASSWORD', ''),
+                'type' => 'string',
+                'group' => 'email_smtp',
+                'description' => 'SMTP authenticating password or App Password.',
+            ],
+            [
+                'key' => 'mail_from_address',
+                'value' => env('MAIL_FROM_ADDRESS', 'johnotchere282@gmail.com'),
+                'type' => 'string',
+                'group' => 'email_smtp',
+                'description' => 'Default sender email address shown to recipients.',
+            ],
+            [
+                'key' => 'mail_from_name',
+                'value' => env('MAIL_FROM_NAME', 'UEW School of Business Digital Library'),
+                'type' => 'string',
+                'group' => 'email_smtp',
+                'description' => 'Default sender display name.',
+            ],
         ];
 
         foreach ($defaults as $setting) {

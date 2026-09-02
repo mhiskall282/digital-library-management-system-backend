@@ -155,6 +155,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         // System Settings & Cache Operations
         Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings');
         Route::put('/settings', [AdminSettingsController::class, 'update'])->name('settings.update');
+        Route::post('/settings/test-smtp', [AdminSettingsController::class, 'testSmtp'])->name('settings.test-smtp');
         Route::post('/settings/cache-clear', [AdminSettingsController::class, 'clearCache'])->name('settings.cache-clear');
 
         // Admin Resource Management

@@ -4,7 +4,25 @@
 @section('page_title', 'Library Management & System Configuration')
 
 @section('content')
-<div class="space-y-6" x-data="{ activeTab: 'academic' }">
+<div class="space-y-6" x-data="{ 
+    activeTab: '{{ request('tab', session('active_tab', 'academic')) }}',
+    showPassword: false,
+    setPreset(provider) {
+        if (provider === 'gmail') {
+            document.getElementById('mail_mailer').value = 'smtp';
+            document.getElementById('mail_host').value = 'smtp.gmail.com';
+            document.getElementById('mail_port').value = '587';
+            document.getElementById('mail_encryption').value = 'tls';
+        } else if (provider === 'zoho') {
+            document.getElementById('mail_mailer').value = 'smtp';
+            document.getElementById('mail_host').value = 'smtppro.zoho.com';
+            document.getElementById('mail_port').value = '465';
+            document.getElementById('mail_encryption').value = 'ssl';
+        } else if (provider === 'log') {
+            document.getElementById('mail_mailer').value = 'log';
+        }
+    }
+}">
 
     <!-- Header Actions -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -75,6 +93,12 @@
                     :class="activeTab === 'notifications' ? 'border-uew-scarlet text-uew-scarlet font-bold' : 'border-transparent text-slate-500 hover:text-slate-800'"
                     class="py-3 px-4 text-xs border-b-2 transition">
                 Alerts & Mail
+            </button>
+            <button @click="activeTab = 'smtp'" type="button" 
+                    :class="activeTab === 'smtp' ? 'border-uew-scarlet text-uew-scarlet font-bold' : 'border-transparent text-slate-500 hover:text-slate-800'"
+                    class="py-3 px-4 text-xs border-b-2 transition flex items-center space-x-1.5">
+                <span>✉️ SMTP & Email Logins</span>
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
             </button>
         </div>
 
@@ -184,12 +208,150 @@
                 </div>
             </div>
 
-            <div class="pt-4 border-t border-slate-100 flex items-center justify-end space-x-3">
-                <button type="submit" class="px-6 py-2.5 bg-uew-scarlet hover:bg-uew-scarlet-hover text-white font-bold text-xs rounded-xl shadow-xs transition">
-                    Save System Parameters
-                </button>
+            <!-- Tab 5: SMTP & Email Server Logins -->
+            <div x-show="activeTab === 'smtp'" class="space-y-6" x-cloak>
+                <div class="bg-blue-50/70 border border-blue-200/80 rounded-2xl p-4 flex items-start space-x-3">
+                    <svg class="w-5 h-5 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <div class="text-xs text-blue-900 leading-relaxed">
+                        <span class="font-bold block text-blue-950 mb-0.5">Live Outbound SMTP Gateway Configuration</span>
+                        Configure live outbound email delivery (Google Gmail, Google Workspace, Zoho, AWS SES, or Custom SMTP). Changes saved here are stored in the database and immediately apply to all automated welcome emails, password resets, and announcements in real-time.
+                    </div>
+                </div>
+
+                <!-- Provider Quick-Presets -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">One-Click Server Presets</label>
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" @click="setPreset('gmail')" class="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition shadow-2xs">
+                            <span>⚡ Google Gmail / Workspace (Port 587 TLS)</span>
+                        </button>
+                        <button type="button" @click="setPreset('zoho')" class="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition shadow-2xs">
+                            <span>✉️ Zoho Mail (Port 465 SSL)</span>
+                        </button>
+                        <button type="button" @click="setPreset('log')" class="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition shadow-2xs">
+                            <span>📋 Log Driver (In-App Only)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Connection Fields Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-slate-100">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Mail Driver *</label>
+                        <select id="mail_mailer" name="mail_mailer" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-uew-scarlet bg-white">
+                            <option value="smtp" {{ ($settings['mail_mailer']->value ?? 'smtp') === 'smtp' ? 'selected' : '' }}>SMTP (Network Dispatch)</option>
+                            <option value="log" {{ ($settings['mail_mailer']->value ?? '') === 'log' ? 'selected' : '' }}>Log (Developer / Simulation)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">SMTP Host *</label>
+                        <input type="text" id="mail_host" name="mail_host" value="{{ old('mail_host', $settings['mail_host']->value ?? 'smtp.gmail.com') }}" placeholder="smtp.gmail.com"
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-uew-scarlet">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">SMTP Port *</label>
+                        <input type="number" id="mail_port" name="mail_port" value="{{ old('mail_port', $settings['mail_port']->value ?? '587') }}" placeholder="587"
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-uew-scarlet">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Transport Encryption</label>
+                        <select id="mail_encryption" name="mail_encryption" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-uew-scarlet bg-white">
+                            <option value="tls" {{ ($settings['mail_encryption']->value ?? 'tls') === 'tls' ? 'selected' : '' }}>TLS / STARTTLS (Port 587)</option>
+                            <option value="ssl" {{ ($settings['mail_encryption']->value ?? '') === 'ssl' ? 'selected' : '' }}>SSL (Port 465)</option>
+                            <option value="none" {{ ($settings['mail_encryption']->value ?? '') === 'none' ? 'selected' : '' }}>None (Unencrypted)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">SMTP Username / Email *</label>
+                        <input type="text" id="mail_username" name="mail_username" value="{{ old('mail_username', $settings['mail_username']->value ?? 'johnotchere282@gmail.com') }}" placeholder="username@gmail.com"
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-uew-scarlet">
+                    </div>
+
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">SMTP Password / App Key</label>
+                            @if(!empty($settings['mail_password']->value))
+                                <span class="text-[10px] font-bold text-emerald-600 flex items-center space-x-1">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                    <span>Configured</span>
+                                </span>
+                            @endif
+                        </div>
+                        <div class="relative">
+                            <input :type="showPassword ? 'text' : 'password'" id="mail_password" name="mail_password" placeholder="{{ !empty($settings['mail_password']->value) ? '•••••••••••••••• (Leave blank to keep current)' : 'Enter 16-char App Password' }}"
+                                   class="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-uew-scarlet">
+                            <button type="button" @click="showPassword = !showPassword" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
+                                <svg x-show="!showPassword" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                <svg x-show="showPassword" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">From Sender Address</label>
+                        <input type="email" id="mail_from_address" name="mail_from_address" value="{{ old('mail_from_address', $settings['mail_from_address']->value ?? 'johnotchere282@gmail.com') }}"
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-uew-scarlet">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">From Sender Display Name</label>
+                        <input type="text" id="mail_from_name" name="mail_from_name" value="{{ old('mail_from_name', $settings['mail_from_name']->value ?? 'UEW School of Business Digital Library') }}"
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-uew-scarlet">
+                    </div>
+                </div>
+
+                <div class="p-4 bg-amber-50/60 border border-amber-200/80 rounded-2xl flex items-start space-x-3">
+                    <svg class="w-5 h-5 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                    <div class="text-[11px] text-amber-900 leading-relaxed">
+                        <span class="font-bold block text-amber-950 mb-0.5">Google Workspace / Gmail Security Note:</span>
+                        Google does not accept regular account passwords over SMTP. You must generate a 16-character <strong>App Password</strong> by visiting <a href="https://myaccount.google.com/apppasswords" target="_blank" class="underline font-bold text-amber-950">myaccount.google.com/apppasswords</a> with 2-Step Verification enabled.
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+                <div x-show="activeTab === 'smtp'" class="flex items-center space-x-2">
+                    <a href="{{ route('admin.mail.index') }}" class="inline-flex items-center space-x-1.5 text-xs font-bold text-uew-navy hover:text-uew-scarlet transition">
+                        <span>Open In-App Email Studio & Mailbox &rarr;</span>
+                    </a>
+                </div>
+                <div x-show="activeTab !== 'smtp'"></div>
+
+                <div class="flex items-center space-x-3">
+                    <button type="submit" class="px-6 py-2.5 bg-uew-scarlet hover:bg-uew-scarlet-hover text-white font-bold text-xs rounded-xl shadow-xs transition">
+                        Save System Parameters
+                    </button>
+                </div>
             </div>
         </form>
+
+        <!-- Quick SMTP Test Dispatch Form (Standalone card in footer) -->
+        <div x-show="activeTab === 'smtp'" class="bg-slate-50 border-t border-slate-200/80 p-6 sm:p-8" x-cloak>
+            <div class="max-w-xl">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800 mb-1">Instant SMTP Connection Ping</h3>
+                <p class="text-[11px] text-slate-500 mb-3">Send a real-time verification email to any address using the current SMTP credentials to verify connectivity.</p>
+                <form method="POST" action="{{ route('admin.settings.test-smtp') }}" class="flex items-center space-x-2">
+                    @csrf
+                    <input type="email" name="test_recipient" value="{{ auth()->user()->email }}" required placeholder="Enter recipient email..."
+                           class="flex-1 px-3.5 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-uew-scarlet bg-white">
+                    <button type="submit" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition shadow-2xs whitespace-nowrap">
+                        Send Test Ping
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
 
 </div>
