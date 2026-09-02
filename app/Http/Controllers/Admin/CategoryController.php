@@ -54,7 +54,7 @@ class CategoryController extends Controller
             'course_name' => trim($validated['course_name']),
             'level' => $validated['level'],
             'semester' => $validated['semester'],
-            'description' => $validated['description'],
+            'description' => $validated['description'] ?? null,
         ]);
 
         ActivityLog::record('CATEGORY_CREATE', $request->user(), $category);
@@ -78,7 +78,7 @@ class CategoryController extends Controller
             'course_name' => trim($validated['course_name']),
             'level' => $validated['level'],
             'semester' => $validated['semester'],
-            'description' => $validated['description'],
+            'description' => $validated['description'] ?? null,
         ]);
 
         ActivityLog::record('CATEGORY_UPDATE', $request->user(), $category);
