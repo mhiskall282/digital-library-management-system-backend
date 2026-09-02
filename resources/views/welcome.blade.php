@@ -30,7 +30,7 @@
     <!-- Main Navigation Bar -->
     <header class="bg-white/90 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-50" x-data="{ mobileMenuOpen: false }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-18">
+            <div class="flex items-center justify-between h-16">
                 <!-- Brand Logo -->
                 <a href="{{ url('/') }}" class="flex items-center space-x-2.5 sm:space-x-3 group">
                     <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-uew-scarlet to-uew-navy flex items-center justify-center text-white shadow-md font-black text-lg sm:text-xl group-hover:scale-105 transition-transform shrink-0">
@@ -103,90 +103,86 @@
             </div>
         </div>
 
-        <!-- Mobile Navigation Drawer with Backdrop -->
+        <!-- Mobile Navigation Backdrop Overlay -->
         <div x-show="mobileMenuOpen" 
-             class="fixed inset-0 top-18 z-50 md:hidden flex flex-col" 
+             x-transition:enter="transition-opacity ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition-opacity ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             @click="mobileMenuOpen = false" 
+             class="fixed inset-0 top-16 bg-slate-950/50 backdrop-blur-xs md:hidden z-40" 
+             x-cloak></div>
+
+        <!-- Mobile Navigation Dropdown Menu -->
+        <div x-show="mobileMenuOpen" 
+             x-transition:enter="transition ease-out duration-200" 
+             x-transition:enter-start="opacity-0 -translate-y-2" 
+             x-transition:enter-end="opacity-100 translate-y-0" 
+             x-transition:leave="transition ease-in duration-150" 
+             x-transition:leave-start="opacity-100 translate-y-0" 
+             x-transition:leave-end="opacity-0 -translate-y-2" 
+             class="absolute top-full inset-x-0 bg-white border-b border-slate-200 shadow-2xl rounded-b-3xl px-4 pt-3 pb-6 space-y-4 max-h-[calc(100vh-4.5rem)] overflow-y-auto md:hidden z-50" 
              x-cloak>
             
-            <!-- Backdrop -->
-            <div x-show="mobileMenuOpen"
-                 x-transition:enter="transition-opacity ease-out duration-200"
-                 x-transition:enter-start="opacity-0"
-                 x-transition:enter-end="opacity-100"
-                 x-transition:leave="transition-opacity ease-in duration-150"
-                 x-transition:leave-start="opacity-100"
-                 x-transition:leave-end="opacity-0"
-                 @click="mobileMenuOpen = false"
-                 class="fixed inset-0 bg-slate-950/40 backdrop-blur-xs"></div>
+            <div class="space-y-1">
+                <div class="px-2 text-[10px] font-black uppercase tracking-wider text-slate-400">Navigation</div>
+                <a href="{{ route('programs.index') }}" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition">
+                    <span class="flex items-center space-x-2.5">
+                        <span>📚</span>
+                        <span>Academic Programs (L100–PhD)</span>
+                    </span>
+                    <span>&rarr;</span>
+                </a>
+                <a href="{{ route('dashboard') }}" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition">
+                    <span class="flex items-center space-x-2.5">
+                        <span>🔍</span>
+                        <span>Catalog Explorer</span>
+                    </span>
+                    <span>&rarr;</span>
+                </a>
+                <a href="#leaderboard" @click="mobileMenuOpen = false" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition">
+                    <span class="flex items-center space-x-2.5">
+                        <span>🎖️</span>
+                        <span>Top Contributors Leaderboard</span>
+                    </span>
+                </a>
+                <a href="{{ route('requests.index') }}" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition">
+                    <span class="flex items-center space-x-2.5">
+                        <span>💬</span>
+                        <span>Request Materials</span>
+                    </span>
+                </a>
+                <a href="{{ url('/docs') }}" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold text-uew-scarlet bg-red-50/60 hover:bg-red-100 transition">
+                    <span class="flex items-center space-x-2.5">
+                        <span>📖</span>
+                        <span>User Guide &amp; Documentation</span>
+                    </span>
+                </a>
+            </div>
 
-            <!-- Drawer Body -->
-            <div x-show="mobileMenuOpen" 
-                 x-transition:enter="transition ease-out duration-200" 
-                 x-transition:enter-start="opacity-0 -translate-y-3" 
-                 x-transition:enter-end="opacity-100 translate-y-0" 
-                 x-transition:leave="transition ease-in duration-150" 
-                 x-transition:leave-start="opacity-100 translate-y-0" 
-                 x-transition:leave-end="opacity-0 -translate-y-3" 
-                 class="relative bg-white border-b border-slate-200 shadow-2xl rounded-b-3xl px-4 pt-3 pb-6 space-y-4 max-h-[82vh] overflow-y-auto">
-                
-                <div class="space-y-1">
-                    <div class="px-2 text-[10px] font-black uppercase tracking-wider text-slate-400">Navigation</div>
-                    <a href="{{ route('programs.index') }}" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition">
-                        <span class="flex items-center space-x-2.5">
-                            <span>📚</span>
-                            <span>Academic Programs (L100–PhD)</span>
-                        </span>
-                        <span>&rarr;</span>
-                    </a>
-                    <a href="{{ route('dashboard') }}" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition">
-                        <span class="flex items-center space-x-2.5">
-                            <span>🔍</span>
-                            <span>Catalog Explorer</span>
-                        </span>
-                        <span>&rarr;</span>
-                    </a>
-                    <a href="#leaderboard" @click="mobileMenuOpen = false" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition">
-                        <span class="flex items-center space-x-2.5">
-                            <span>🎖️</span>
-                            <span>Top Contributors Leaderboard</span>
-                        </span>
-                    </a>
-                    <a href="{{ route('requests.index') }}" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition">
-                        <span class="flex items-center space-x-2.5">
-                            <span>💬</span>
-                            <span>Request Materials</span>
-                        </span>
-                    </a>
-                    <a href="{{ url('/docs') }}" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold text-uew-scarlet bg-red-50/60 hover:bg-red-100 transition">
-                        <span class="flex items-center space-x-2.5">
-                            <span>📖</span>
-                            <span>User Guide &amp; Documentation</span>
-                        </span>
-                    </a>
-                </div>
-
-                <div class="pt-3 border-t border-slate-200">
-                    @auth
-                        @if(auth()->user()->isAdmin())
-                            <a href="{{ route('admin.dashboard') }}" class="w-full flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl bg-uew-navy text-white font-bold text-xs shadow-xs transition">
-                                <span>⚡ Admin Command Center &rarr;</span>
-                            </a>
-                        @else
-                            <a href="{{ route('student.hub') }}" class="w-full flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl bg-uew-scarlet text-white font-bold text-xs shadow-xs transition">
-                                <span>🎓 My Study Hub &rarr;</span>
-                            </a>
-                        @endif
+            <div class="pt-3 border-t border-slate-200">
+                @auth
+                    @if(auth()->user()->isAdmin())
+                        <a href="{{ route('admin.dashboard') }}" class="w-full flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl bg-uew-navy text-white font-bold text-xs shadow-xs transition">
+                            <span>⚡ Admin Command Center &rarr;</span>
+                        </a>
                     @else
-                        <div class="grid grid-cols-2 gap-2">
-                            <a href="{{ route('login') }}" class="flex items-center justify-center px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-50 transition text-center">
-                                Sign In
-                            </a>
-                            <a href="{{ route('register') }}" class="flex items-center justify-center px-4 py-2.5 rounded-xl bg-uew-scarlet hover:bg-uew-scarlet-hover text-white text-xs font-bold transition text-center shadow-xs">
-                                Register Index No.
-                            </a>
-                        </div>
-                    @endauth
-                </div>
+                        <a href="{{ route('student.hub') }}" class="w-full flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl bg-uew-scarlet text-white font-bold text-xs shadow-xs transition">
+                            <span>🎓 My Study Hub &rarr;</span>
+                        </a>
+                    @endif
+                @else
+                    <div class="grid grid-cols-2 gap-2">
+                        <a href="{{ route('login') }}" class="flex items-center justify-center px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-50 transition text-center">
+                            Sign In
+                        </a>
+                        <a href="{{ route('register') }}" class="flex items-center justify-center px-4 py-2.5 rounded-xl bg-uew-scarlet hover:bg-uew-scarlet-hover text-white text-xs font-bold transition text-center shadow-xs">
+                            Register Index No.
+                        </a>
+                    </div>
+                @endauth
             </div>
         </div>
     </header>
